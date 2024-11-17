@@ -1,26 +1,25 @@
-import { dbService } from './database';
+import { useAnalysisStore } from '@/stores/analysisStore';
 import { useAuthStore } from '@/stores/authStore';
 
 export const analysisService = {
-  async saveAnalysis(content: string, model: string, cost: number) {
+  saveAnalysis(content: string, model: string, cost: number) {
     const user = useAuthStore.getState().user;
     if (!user) throw new Error('Non authentifié');
 
-    return dbService.saveAnalysis(user.id, content, model, cost);
+    useAnalysisStore.getState().addAnalysis({ content, model, cost });
   },
 
-  async getAnalyses() {
+  getAnalyses() {
     const user = useAuthStore.getState().user;
     if (!user) throw new Error('Non authentifié');
 
-    return dbService.getAnalyses(user.id);
+    return useAnalysisStore.getState().analyses;
   },
 
-  async checkAnalysisLimit() {
+  checkAnalysisLimit() {
     const user = useAuthStore.getState().user;
     if (!user) return false;
 
-    const count = await dbService.getDailyAnalysisCount(user.id);
-    return count < 5;
+    return useAnalysisStore.getState().checkDailyLimit();
   }
 };
