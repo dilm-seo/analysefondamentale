@@ -1,13 +1,3 @@
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: 'user' | 'admin';
-  subscription?: 'free' | 'basic' | 'premium' | 'enterprise';
-  createdAt?: string;
-  lastLogin?: string;
-}
-
 export interface FeedSource {
   name: string;
   url: string;
@@ -29,17 +19,4 @@ export interface Settings {
   analysisFormat: 'html' | 'markdown' | 'text';
   apiKey?: string;
   systemPrompt?: string;
-}
-
-export interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalAnalyses: number;
-  totalCosts: number;
-  subscriptionStats: {
-    free: number;
-    basic: number;
-    premium: number;
-    enterprise: number;
-  };
 }

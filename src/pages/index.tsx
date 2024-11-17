@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNewsStore } from '@/stores/newsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { analysisService } from '@/services/analysisService';

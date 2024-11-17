@@ -1,15 +1,11 @@
-import { useSettingsStore } from '@/stores/settingsStore';
+import axios from 'axios';
 
 export const analysisService = {
   async analyzeNews(news: any[], apiKey: string, model: string, systemPrompt: string) {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
           model,
           messages: [
             { role: 'system', content: systemPrompt },
@@ -17,17 +13,24 @@ export const analysisService = {
           ],
           temperature: 0.7,
           max_tokens: 2000
-        })
-      });
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'analyse');
-      }
-
-      const data = await response.json();
-      return data.choices[0].message.content;
+      return response.data.choices[0].message.content;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Erreur lors de l\'analyse');
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error('Clé API invalide');
+        }
+        throw new Error(error.response?.data?.error || error.message);
+      }
+      throw new Error('Erreur lors de l\'analyse');
     }
   }
 };
