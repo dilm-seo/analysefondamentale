@@ -1,11 +1,9 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import db from '@/lib/db';
 
-const prisma = new PrismaClient();
-
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -18,9 +16,8 @@ export default NextAuth({
           throw new Error('Email et mot de passe requis');
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
+        const user = stmt.get(credentials.email);
 
         if (!user) {
           throw new Error('Utilisateur non trouvé');
@@ -32,10 +29,8 @@ export default NextAuth({
           throw new Error('Mot de passe incorrect');
         }
 
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLogin: new Date() }
-        });
+        const updateStmt = db.prepare('UPDATE users SET last_login = ? WHERE id = ?');
+        updateStmt.run(new Date().toISOString(), user.id);
 
         return {
           id: user.id,
@@ -46,25 +41,31 @@ export default NextAuth({
       }
     })
   ],
-  session: {
-    strategy: 'jwt'
-  },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error'
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
-        session.user.role = token.role;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     }
-  }
-});
+  },
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error'
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60 // 30 days
+  },
+  secret: process.env.NEXTAUTH_SECRET
+};
+
+export default NextAuth(authOptions);
