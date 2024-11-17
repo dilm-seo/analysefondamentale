@@ -1,23 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
+import { analysisService } from '@/services/analysisService';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session?.user) {
-    return res.status(401).json({ error: 'Non authentifié' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
-  // Simplified response for demo
-  if (req.method === 'GET') {
-    return res.status(200).json([]);
+  try {
+    const { news, apiKey, model, systemPrompt } = req.body;
+    const result = await analysisService.analyzeNews(news, apiKey, model, systemPrompt);
+    res.status(200).json({ result });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Erreur serveur' });
   }
-
-  if (req.method === 'POST') {
-    const { content, model, cost } = req.body;
-    return res.status(201).json({ content, model, cost });
-  }
-
-  res.status(405).json({ error: 'Méthode non autorisée' });
 }

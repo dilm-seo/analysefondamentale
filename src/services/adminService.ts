@@ -1,8 +1,6 @@
-// Simplified version without database dependency
-import { AdminStats } from '@/types';
-
+// Simplified version without database
 export const adminService = {
-  getStats(): AdminStats {
+  getStats() {
     return {
       totalUsers: 0,
       activeUsers: 0,
@@ -22,7 +20,6 @@ export const adminService = {
   },
 
   deleteUser() {
-    // Simplified version
     return Promise.resolve();
   }
 };
