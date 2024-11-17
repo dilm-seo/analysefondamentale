@@ -1,19 +1,15 @@
-import { useAuthStore } from '@/stores/authStore';
-import { useAnalysisStore } from '@/stores/analysisStore';
+// Simplified version without database dependency
 import { AdminStats } from '@/types';
 
 export const adminService = {
   getStats(): AdminStats {
-    const analyses = useAnalysisStore.getState().analyses;
-    const totalCosts = analyses.reduce((sum, a) => sum + a.cost, 0);
-
     return {
-      totalUsers: 1,
-      activeUsers: 1,
-      totalAnalyses: analyses.length,
-      totalCosts,
+      totalUsers: 0,
+      activeUsers: 0,
+      totalAnalyses: 0,
+      totalCosts: 0,
       subscriptionStats: {
-        free: 1,
+        free: 0,
         basic: 0,
         premium: 0,
         enterprise: 0
@@ -22,19 +18,11 @@ export const adminService = {
   },
 
   getAllUsers() {
-    const user = useAuthStore.getState().user;
-    if (!user) return [];
-    
-    return [{
-      id: '1',
-      email: user.email,
-      username: user.name,
-      role: 'user',
-      subscription: 'free'
-    }];
+    return [];
   },
 
   deleteUser() {
-    useAuthStore.getState().logout();
+    // Simplified version
+    return Promise.resolve();
   }
 };
