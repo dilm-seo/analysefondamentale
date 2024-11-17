@@ -1,21 +1,21 @@
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import Layout from '../components/Layout';
-import NewsList from '../components/NewsList';
+import { useRouter } from 'next/router';
+import { useAuthStore } from '@/stores/authStore';
+import Layout from '@/components/Layout';
+import NewsList from '@/components/NewsList';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!isAuthenticated) {
       router.push('/auth/signin');
     }
-  }, [status, router]);
+  }, [isAuthenticated, router]);
 
-  if (status === 'loading') {
-    return <div>Loading...</div>;
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
