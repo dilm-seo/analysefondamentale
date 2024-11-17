@@ -24,6 +24,7 @@ interface NewsState {
   addFeed: (feed: FeedSource) => void;
   removeFeed: (url: string) => void;
   toggleFeed: (url: string) => void;
+  updateFeed: (originalUrl: string, updatedFeed: FeedSource) => void;
   fetchNews: () => Promise<void>;
 }
 
@@ -44,12 +45,14 @@ export const useNewsStore = create<NewsState>()(
       addFeed: (feed) => {
         set((state) => ({
           feeds: [...state.feeds, feed],
+          error: null,
         }));
       },
 
       removeFeed: (url) => {
         set((state) => ({
           feeds: state.feeds.filter((f) => f.url !== url),
+          error: null,
         }));
       },
 
@@ -58,6 +61,16 @@ export const useNewsStore = create<NewsState>()(
           feeds: state.feeds.map((f) =>
             f.url === url ? { ...f, enabled: !f.enabled } : f
           ),
+          error: null,
+        }));
+      },
+
+      updateFeed: (originalUrl, updatedFeed) => {
+        set((state) => ({
+          feeds: state.feeds.map((f) =>
+            f.url === originalUrl ? updatedFeed : f
+          ),
+          error: null,
         }));
       },
 

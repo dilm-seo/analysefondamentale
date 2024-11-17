@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNewsStore } from '../stores/newsStore';
-import { useGptStore } from '../stores/gptStore';
-import { FeedSource } from '../types';
+import { useNewsStore } from '@/stores/newsStore';
+import { useGptStore } from '@/stores/gptStore';
+import { FeedSource } from '@/types';
 import toast from 'react-hot-toast';
 
 const SettingsPanel: React.FC = () => {
@@ -38,6 +38,20 @@ const SettingsPanel: React.FC = () => {
       toast.success('Flux ajouté avec succès');
     } catch {
       toast.error('Veuillez entrer une URL valide');
+    }
+  };
+
+  const handleEditSubmit = (originalUrl: string) => {
+    if (!editedFeed) return;
+
+    try {
+      new URL(editedFeed.url);
+      updateFeed(originalUrl, editedFeed);
+      setEditMode(null);
+      setEditedFeed(null);
+      toast.success('Flux mis à jour avec succès');
+    } catch {
+      toast.error('URL invalide');
     }
   };
 
@@ -100,15 +114,7 @@ const SettingsPanel: React.FC = () => {
                 className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono text-sm"
                 placeholder="Entrez le prompt système..."
               />
-              <p className="mt-2 text-sm text-gray-400">
-                Ce prompt définit le comportement et le format de réponse de l'assistant GPT.
-              </p>
             </div>
-          </div>
-
-          <div className="mt-4 text-sm text-gray-400">
-            <p>La traduction automatique est assurée par LibreTranslate (gratuit)</p>
-            <p>Langues supportées : Anglais → Français</p>
           </div>
         </div>
 
@@ -156,25 +162,72 @@ const SettingsPanel: React.FC = () => {
 
         <div className="space-y-4">
           {feeds.map((feed) => (
-            <div key={feed.url} className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="checkbox"
-                  checked={feed.enabled}
-                  onChange={() => toggleFeed(feed.url)}
-                  className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-                />
-                <div>
-                  <h4 className="font-medium text-white">{feed.name}</h4>
-                  <p className="text-sm text-gray-400">{feed.url}</p>
+            <div key={feed.url} className="bg-gray-700 rounded-lg p-4">
+              {editMode === feed.url ? (
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={editedFeed?.name || ''}
+                    onChange={(e) => setEditedFeed({ ...editedFeed!, name: e.target.value })}
+                    className="w-full bg-gray-600 rounded px-3 py-2 text-white"
+                  />
+                  <input
+                    type="url"
+                    value={editedFeed?.url || ''}
+                    onChange={(e) => setEditedFeed({ ...editedFeed!, url: e.target.value })}
+                    className="w-full bg-gray-600 rounded px-3 py-2 text-white"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditSubmit(feed.url)}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500"
+                    >
+                      Sauvegarder
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditMode(null);
+                        setEditedFeed(null);
+                      }}
+                      className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                    >
+                      Annuler
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <button
-                onClick={() => handleRemoveFeed(feed.url)}
-                className="text-red-400 hover:text-red-300 transition-colors"
-              >
-                Supprimer
-              </button>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="checkbox"
+                      checked={feed.enabled}
+                      onChange={() => toggleFeed(feed.url)}
+                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                    />
+                    <div>
+                      <h4 className="font-medium text-white">{feed.name}</h4>
+                      <p className="text-sm text-gray-400">{feed.url}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditMode(feed.url);
+                        setEditedFeed(feed);
+                      }}
+                      className="text-indigo-400 hover:text-indigo-300"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleRemoveFeed(feed.url)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
