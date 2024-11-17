@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useAdminStore } from '../../stores/adminStore';
-import { useAuthStore } from '../../stores/authStore';
+import { useAdminStore } from '@/stores/adminStore';
+import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 
 const AdminDashboard: React.FC = () => {
@@ -12,7 +12,7 @@ const AdminDashboard: React.FC = () => {
       fetchStats().catch(() => toast.error('Erreur de chargement des statistiques'));
       fetchUsers().catch(() => toast.error('Erreur de chargement des utilisateurs'));
     }
-  }, [user]);
+  }, [user, fetchStats, fetchUsers]);
 
   if (user?.role !== 'admin') {
     return (
@@ -108,7 +108,7 @@ const AdminDashboard: React.FC = () => {
                 {users.map((user) => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white">{user.username}</div>
+                      <div className="text-sm text-white">{user.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-300">{user.email}</div>
@@ -124,14 +124,6 @@ const AdminDashboard: React.FC = () => {
                       <div className="text-sm text-gray-300">{user.subscription}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => {
-                          // Implémenter la modification
-                        }}
-                        className="text-indigo-400 hover:text-indigo-300 mr-4"
-                      >
-                        Modifier
-                      </button>
                       <button
                         onClick={() => {
                           if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
