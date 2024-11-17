@@ -4,13 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.0",
     "@vercel/postgres": "^0.5.1",
     "next": "14.0.3",
     "next-auth": "^4.24.5",
@@ -26,16 +24,16 @@
     "@tailwindcss/typography": "^0.5.10",
     "@heroicons/react": "^2.1.1",
     "bcryptjs": "^2.4.3",
-    "drizzle-orm": "^0.29.1"
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@types/node": "^20.10.4",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "prisma": "^5.7.0",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2"
   }

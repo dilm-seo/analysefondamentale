@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { db, prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -16,10 +16,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const userId = session.user.id;
 
       // Vérifier les limites d'analyse pour les utilisateurs gratuits
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { subscription: true }
-      });
+      const { rows: [user] } = await db.query(
+        'SELECT subscription FROM users WHERE id = $1',
+        [userId]
+      );
 
       if (user?.subscription === 'free') {
         const today = new Date().toISOString().split('T')[0];
@@ -35,14 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      const analysis = await prisma.analysis.create({
-        data: {
-          content,
-          model,
-          cost,
-          userId
-        }
-      });
+      const { rows: [analysis] } = await db.query(`
+        INSERT INTO analyses (id, user_id, content, model, cost)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4)
+        RETURNING *
+      `, [userId, content, model, cost]);
 
       res.status(201).json(analysis);
     } catch (error) {
@@ -51,10 +48,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'GET') {
     try {
-      const analyses = await prisma.analysis.findMany({
-        where: { userId: session.user.id },
-        orderBy: { createdAt: 'desc' }
-      });
+      const { rows: analyses } = await db.query(
+        'SELECT * FROM analyses WHERE user_id = $1 ORDER BY created_at DESC',
+        [session.user.id]
+      );
 
       res.status(200).json(analyses);
     } catch (error) {

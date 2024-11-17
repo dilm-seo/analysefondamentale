@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,9 +16,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email et mot de passe requis');
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        const { rows: [user] } = await db.query(
+          'SELECT * FROM users WHERE email = $1',
+          [credentials.email]
+        );
 
         if (!user) {
           throw new Error('Utilisateur non trouvé');
@@ -30,10 +31,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Mot de passe incorrect');
         }
 
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLogin: new Date() }
-        });
+        await db.execute(
+          'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+          [user.id]
+        );
 
         return {
           id: user.id,

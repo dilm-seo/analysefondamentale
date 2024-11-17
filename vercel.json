@@ -7,6 +7,7 @@
   "env": {
     "NEXTAUTH_URL": "https://${VERCEL_URL}",
     "VERCEL_URL": "${VERCEL_URL}",
-    "DATABASE_PATH": "/tmp/forex_analyzer.db"
+    "POSTGRES_URL": "${POSTGRES_URL}",
+    "POSTGRES_URL_NON_POOLING": "${POSTGRES_URL_NON_POOLING}"
   }
 }
