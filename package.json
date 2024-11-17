@@ -23,7 +23,6 @@
     "@tailwindcss/typography": "^0.5.10",
     "@heroicons/react": "^2.1.1",
     "bcryptjs": "^2.4.3",
-    "sqlite3": "^5.1.6",
     "better-sqlite3": "^9.2.2"
   },
   "devDependencies": {
@@ -31,10 +30,10 @@
     "@types/react-dom": "^18.2.15",
     "@types/node": "^20.10.4",
     "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.8",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "typescript": "^5.2.2",
-    "@types/better-sqlite3": "^7.6.8"
+    "typescript": "^5.2.2"
   }
 }

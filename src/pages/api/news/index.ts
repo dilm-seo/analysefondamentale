@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
+import db from '@/lib/db';
 import axios from 'axios';
 
-const prisma = new PrismaClient();
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions);
 
   if (!session) {
     return res.status(401).json({ error: 'Non authentifié' });
@@ -14,9 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      const feeds = await prisma.feed.findMany({
-        where: { enabled: true }
-      });
+      const stmt = db.prepare('SELECT * FROM feeds WHERE enabled = 1');
+      const feeds = stmt.all();
 
       const newsPromises = feeds.map(async (feed) => {
         try {
@@ -27,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
           });
 
-          // Parser le XML et extraire les news
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(response.data, 'text/xml');
           const items = Array.from(xmlDoc.querySelectorAll('item'));
