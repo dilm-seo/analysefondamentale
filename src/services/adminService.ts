@@ -13,7 +13,8 @@ export const adminService = {
         subscriptionStats: {
           free: Number(stats.free_users),
           basic: Number(stats.basic_users),
-          premium: Number(stats.premium_users)
+          premium: Number(stats.premium_users),
+          enterprise: Number(stats.enterprise_users || 0)
         }
       };
     } catch (error) {
@@ -30,7 +31,7 @@ export const adminService = {
         email: user.email,
         username: user.username,
         role: user.role as 'user' | 'admin',
-        subscription: user.subscription as 'free' | 'basic' | 'premium',
+        subscription: user.subscription as 'free' | 'basic' | 'premium' | 'enterprise',
         createdAt: user.created_at?.toString(),
         lastLogin: user.last_login?.toString()
       }));

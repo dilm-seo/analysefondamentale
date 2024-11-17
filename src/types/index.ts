@@ -3,7 +3,7 @@ export interface User {
   email: string;
   username: string;
   role: 'user' | 'admin';
-  subscription?: 'free' | 'basic' | 'premium';
+  subscription?: 'free' | 'basic' | 'premium' | 'enterprise';
   createdAt?: string;
   lastLogin?: string;
 }
@@ -40,5 +40,6 @@ export interface AdminStats {
     free: number;
     basic: number;
     premium: number;
+    enterprise: number;
   };
 }

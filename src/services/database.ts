@@ -82,7 +82,8 @@ export const dbService = {
           COALESCE(SUM(a.cost), 0) as total_costs,
           COUNT(CASE WHEN u.subscription = 'free' THEN 1 END) as free_users,
           COUNT(CASE WHEN u.subscription = 'basic' THEN 1 END) as basic_users,
-          COUNT(CASE WHEN u.subscription = 'premium' THEN 1 END) as premium_users
+          COUNT(CASE WHEN u.subscription = 'premium' THEN 1 END) as premium_users,
+          COUNT(CASE WHEN u.subscription = 'enterprise' THEN 1 END) as enterprise_users
         FROM users u
         LEFT JOIN analyses a ON u.id = a.user_id
       )

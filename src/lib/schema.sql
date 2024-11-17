@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   username TEXT NOT NULL,
-  password TEXT NOT NULL,
   role TEXT DEFAULT 'user',
   subscription TEXT DEFAULT 'free',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
