@@ -8,5 +8,11 @@
     "NEXTAUTH_URL": "https://${VERCEL_URL}",
     "VERCEL_URL": "${VERCEL_URL}",
     "DATABASE_PATH": "/tmp/forex_analyzer.db"
+  },
+  "functions": {
+    "api/**": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
   }
 }

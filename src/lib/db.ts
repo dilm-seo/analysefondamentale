@@ -1,19 +1,36 @@
 import Database from 'better-sqlite3';
+import fs from 'fs';
 import path from 'path';
 
 let db: Database.Database;
 
+// Ensure the database directory exists in production
 if (process.env.NODE_ENV === 'production') {
-  db = new Database(process.env.DATABASE_PATH || ':memory:');
+  const dbDir = path.dirname(process.env.DATABASE_PATH || '/tmp/forex_analyzer.db');
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+}
+
+// Initialize database connection
+if (process.env.NODE_ENV === 'production') {
+  db = new Database(process.env.DATABASE_PATH || '/tmp/forex_analyzer.db', {
+    verbose: console.log
+  });
 } else {
   if (!(global as any).db) {
-    (global as any).db = new Database(':memory:');
+    (global as any).db = new Database(':memory:', {
+      verbose: console.log
+    });
     initializeDatabase((global as any).db);
   }
   db = (global as any).db;
 }
 
 function initializeDatabase(database: Database.Database) {
+  database.pragma('journal_mode = WAL');
+  database.pragma('synchronous = NORMAL');
+  
   database.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
