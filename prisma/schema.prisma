@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String
+  password      String
+  role          String    @default("user")
+  subscription  String    @default("free")
+  createdAt     DateTime  @default(now())
+  lastLogin     DateTime?
+  analyses      Analysis[]
+  settings      Settings?
+}
+
+model Settings {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id])
+  theme               String  @default("dark")
+  language            String  @default("fr")
+  emailNotifications  Boolean @default(true)
+  analysisFormat      String  @default("html")
+  apiKey              String?
+  systemPrompt        String? @db.Text
+}
+
+model Analysis {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String   @db.Text
+  model     String
+  cost      Float
+  createdAt DateTime @default(now())
+}
+
+model Feed {
+  id      String  @id @default(cuid())
+  name    String
+  url     String  @unique
+  enabled Boolean @default(true)
+}
