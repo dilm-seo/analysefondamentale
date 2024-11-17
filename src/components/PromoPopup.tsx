@@ -1,11 +1,11 @@
-import React from 'react';
+import { useState } from 'react';
 
 interface PromoPopupProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const PromoPopup: React.FC<PromoPopupProps> = ({ isOpen, onClose }) => {
+export default function PromoPopup({ isOpen, onClose }: PromoPopupProps) {
   if (!isOpen) return null;
 
   return (
@@ -13,7 +13,7 @@ const PromoPopup: React.FC<PromoPopupProps> = ({ isOpen, onClose }) => {
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 relative border border-indigo-500">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
         >
           ✕
         </button>
@@ -40,6 +40,4 @@ const PromoPopup: React.FC<PromoPopupProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
-
-export default PromoPopup;
+}

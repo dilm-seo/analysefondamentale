@@ -1,78 +1,69 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useNewsStore } from '@/stores/newsStore';
-import { useGptStore } from '@/stores/gptStore';
-import { FeedSource } from '@/types';
 import toast from 'react-hot-toast';
 
-const SettingsPanel: React.FC = () => {
-  const { feeds, addFeed, removeFeed, toggleFeed, updateFeed, error: feedError } = useNewsStore();
+export default function SettingsPanel() {
   const { 
-    apiKey: gptKey, 
+    apiKey, 
     model, 
     systemPrompt,
-    setApiKey: setGptKey, 
-    setModel, 
-    setSystemPrompt,
-    error: gptError 
-  } = useGptStore();
-  
-  const [editMode, setEditMode] = useState<string | null>(null);
-  const [editedFeed, setEditedFeed] = useState<FeedSource | null>(null);
-  const [newFeed, setNewFeed] = useState<FeedSource>({
+    feeds,
+    updateSettings,
+    addFeed,
+    removeFeed,
+    toggleFeed 
+  } = useSettingsStore();
+
+  const { fetchNews } = useNewsStore();
+
+  const [newFeed, setNewFeed] = useState({
     name: '',
-    url: '',
-    enabled: true,
+    url: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFeed.name.trim() || !newFeed.url.trim()) {
+    if (!newFeed.name || !newFeed.url) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
 
     try {
       new URL(newFeed.url);
-      addFeed(newFeed);
-      setNewFeed({ name: '', url: '', enabled: true });
+      if (!newFeed.url.toLowerCase().endsWith('.rss') && !newFeed.url.includes('/feed')) {
+        toast.error('L\'URL doit pointer vers un flux RSS valide');
+        return;
+      }
+      addFeed(newFeed.name, newFeed.url);
+      setNewFeed({ name: '', url: '' });
       toast.success('Flux ajouté avec succès');
-    } catch {
-      toast.error('Veuillez entrer une URL valide');
-    }
-  };
-
-  const handleEditSubmit = (originalUrl: string) => {
-    if (!editedFeed) return;
-
-    try {
-      new URL(editedFeed.url);
-      updateFeed(originalUrl, editedFeed);
-      setEditMode(null);
-      setEditedFeed(null);
-      toast.success('Flux mis à jour avec succès');
+      // Rafraîchit les actualités après l'ajout d'un feed
+      await fetchNews();
     } catch {
       toast.error('URL invalide');
     }
   };
 
-  const handleRemoveFeed = (url: string) => {
-    removeFeed(url);
-    toast.success('Flux supprimé avec succès');
+  const handleToggleFeed = async (url: string) => {
+    toggleFeed(url);
+    // Rafraîchit les actualités après avoir activé/désactivé un feed
+    await fetchNews();
   };
 
-  const handleSystemPromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setSystemPrompt(e.target.value);
-    toast.success('Prompt système mis à jour');
+  const handleRemoveFeed = async (url: string) => {
+    removeFeed(url);
+    toast.success('Source supprimée');
+    // Rafraîchit les actualités après la suppression d'un feed
+    await fetchNews();
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* Section Paramètres API */}
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="bg-gray-800 rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-white">Paramètres API</h2>
         
         <div className="space-y-6">
-          {/* OpenAI GPT */}
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-white">OpenAI GPT</h3>
             <div>
@@ -81,8 +72,8 @@ const SettingsPanel: React.FC = () => {
               </label>
               <input
                 type="password"
-                value={gptKey}
-                onChange={(e) => setGptKey(e.target.value)}
+                value={apiKey}
+                onChange={(e) => updateSettings({ apiKey: e.target.value })}
                 className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 placeholder="sk-..."
               />
@@ -94,7 +85,7 @@ const SettingsPanel: React.FC = () => {
               </label>
               <select
                 value={model}
-                onChange={(e) => setModel(e.target.value)}
+                onChange={(e) => updateSettings({ model: e.target.value })}
                 className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               >
                 <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
@@ -109,7 +100,7 @@ const SettingsPanel: React.FC = () => {
               </label>
               <textarea
                 value={systemPrompt}
-                onChange={handleSystemPromptChange}
+                onChange={(e) => updateSettings({ systemPrompt: e.target.value })}
                 rows={15}
                 className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono text-sm"
                 placeholder="Entrez le prompt système..."
@@ -117,15 +108,8 @@ const SettingsPanel: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {gptError && (
-          <div className="mt-4 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
-            {gptError}
-          </div>
-        )}
       </div>
 
-      {/* Section Sources d'actualités */}
       <div className="bg-gray-800 rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-white">Sources d'actualités</h2>
         
@@ -148,8 +132,11 @@ const SettingsPanel: React.FC = () => {
               value={newFeed.url}
               onChange={(e) => setNewFeed({ ...newFeed, url: e.target.value })}
               className="w-full bg-gray-700 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              placeholder="https://example.com/feed"
+              placeholder="https://example.com/feed.rss"
             />
+            <p className="mt-1 text-sm text-gray-400">
+              Exemple: https://www.investing.com/rss/news.rss
+            </p>
           </div>
           
           <button
@@ -161,85 +148,30 @@ const SettingsPanel: React.FC = () => {
         </form>
 
         <div className="space-y-4">
-          {feeds.map((feed) => (
-            <div key={feed.url} className="bg-gray-700 rounded-lg p-4">
-              {editMode === feed.url ? (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={editedFeed?.name || ''}
-                    onChange={(e) => setEditedFeed({ ...editedFeed!, name: e.target.value })}
-                    className="w-full bg-gray-600 rounded px-3 py-2 text-white"
-                  />
-                  <input
-                    type="url"
-                    value={editedFeed?.url || ''}
-                    onChange={(e) => setEditedFeed({ ...editedFeed!, url: e.target.value })}
-                    className="w-full bg-gray-600 rounded px-3 py-2 text-white"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditSubmit(feed.url)}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500"
-                    >
-                      Sauvegarder
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditMode(null);
-                        setEditedFeed(null);
-                      }}
-                      className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
-                    >
-                      Annuler
-                    </button>
-                  </div>
+          {feeds?.map((feed) => (
+            <div key={feed.url} className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <input
+                  type="checkbox"
+                  checked={feed.enabled}
+                  onChange={() => handleToggleFeed(feed.url)}
+                  className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                />
+                <div>
+                  <h4 className="font-medium text-white">{feed.name}</h4>
+                  <p className="text-sm text-gray-400">{feed.url}</p>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="checkbox"
-                      checked={feed.enabled}
-                      onChange={() => toggleFeed(feed.url)}
-                      className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
-                    />
-                    <div>
-                      <h4 className="font-medium text-white">{feed.name}</h4>
-                      <p className="text-sm text-gray-400">{feed.url}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setEditMode(feed.url);
-                        setEditedFeed(feed);
-                      }}
-                      className="text-indigo-400 hover:text-indigo-300"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleRemoveFeed(feed.url)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
-              )}
+              </div>
+              <button
+                onClick={() => handleRemoveFeed(feed.url)}
+                className="text-red-400 hover:text-red-300 transition-colors"
+              >
+                Supprimer
+              </button>
             </div>
           ))}
         </div>
-
-        {feedError && (
-          <div className="mt-4 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
-            {feedError}
-          </div>
-        )}
       </div>
     </div>
   );
-};
-
-export default SettingsPanel;
+}

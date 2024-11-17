@@ -1,15 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+interface Feed {
+  name: string;
+  url: string;
+  enabled: boolean;
+}
+
 interface Settings {
   apiKey: string;
   model: string;
   systemPrompt: string;
-  feeds: Array<{
-    name: string;
-    url: string;
-    enabled: boolean;
-  }>;
+  feeds: Feed[];
 }
 
 interface SettingsStore extends Settings {
@@ -19,26 +21,36 @@ interface SettingsStore extends Settings {
   toggleFeed: (url: string) => void;
 }
 
-const DEFAULT_SYSTEM_PROMPT = `Tu es un expert en trading Forex spécialisé dans l'analyse des actualités financières. Ta mission est de fournir des recommandations de trading précises et exploitables.
+const DEFAULT_SYSTEM_PROMPT = `Je suis une IA spécialisée dans l'analyse des marchés et la génération d'opportunités de trading basées uniquement sur l'analyse fondamentale des données réelles. Mon processus suit une méthodologie stricte et structurée pour garantir la qualité et l'exhaustivité des analyses :
 
-Format de réponse requis:
+Identifie et analyse les 15 news les plus importantes publiées impactantant fortement le cours des devises
 
-SYNTHÈSE DU MARCHÉ:
-- Résumé bref des points clés des actualités
+Tu dois identifier 3 types d'opportunités (court, moyen et long terme)
 
-OPPORTUNITÉS DE TRADING:
-1. [Paire de devises] - [Direction: ACHAT/VENTE]
-   - Point d'entrée: [niveau]
-   - Stop loss: [niveau]
-   - Take profit: [niveau]
-   - Ratio risque/rendement: [ratio]
-   - Justification: [explication courte]
+Voici ce que tu dois me donner pour chaque opportunité:
 
-RISQUES PRINCIPAUX:
-- Liste des risques majeurs à surveiller
+💱Paire concernées:
+🔵🔴 Sentiment: (Haussier ou baissier pour ...)
+🔥 Puissance du Signal: 🔥 (faible) ou 🔥🔥 (moyen) ou 🔥🔥🔥 (fort)
+❓ Pourquoi haussier/Baissier ?
+⌚ Heure des news
+🌐 Les 3 News qui appuient le plus ton analyse trouvés sur les liens feed de tes consignes (précise les dates et heures)
+❓ Y a-t-il des nouvelles contradictoires ?
 
-HORIZON DE TRADING:
-- Court terme (intraday/swing)`;
+Disclamer: Les analyses et recommandations fournies sont basées uniquement sur l'analyse fondamentale des actualités et ne constituent pas des conseils financiers. Le trading comporte des risques, effectuez toujours vos propres recherches avant de prendre une décision d'investissement.`;
+
+const DEFAULT_FEEDS = [
+  {
+    name: 'ForexLive',
+    url: 'https://www.forexlive.com/feed/news',
+    enabled: true,
+  },
+  {
+    name: 'Investing.com',
+    url: 'https://www.investing.com/rss/news.rss',
+    enabled: true,
+  }
+];
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
@@ -46,13 +58,7 @@ export const useSettingsStore = create<SettingsStore>()(
       apiKey: '',
       model: 'gpt-3.5-turbo',
       systemPrompt: DEFAULT_SYSTEM_PROMPT,
-      feeds: [
-        {
-          name: 'ForexLive',
-          url: 'https://www.forexlive.com/feed/news',
-          enabled: true,
-        }
-      ],
+      feeds: DEFAULT_FEEDS,
       updateSettings: (newSettings) => set((state) => ({ ...state, ...newSettings })),
       addFeed: (name, url) => set((state) => ({
         ...state,
@@ -70,7 +76,8 @@ export const useSettingsStore = create<SettingsStore>()(
       }))
     }),
     {
-      name: 'forex-settings'
+      name: 'forex-settings',
+      version: 1
     }
   )
 );
