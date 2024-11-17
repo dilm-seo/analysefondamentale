@@ -8,13 +8,13 @@ const AdminDashboard: React.FC = () => {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (user && user.role === 'admin') {
       fetchStats().catch(() => toast.error('Erreur de chargement des statistiques'));
       fetchUsers().catch(() => toast.error('Erreur de chargement des utilisateurs'));
     }
   }, [user, fetchStats, fetchUsers]);
 
-  if (user?.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white text-xl">Accès non autorisé</div>
@@ -88,9 +88,6 @@ const AdminDashboard: React.FC = () => {
               <thead className="bg-gray-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Utilisateur
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -107,9 +104,6 @@ const AdminDashboard: React.FC = () => {
               <tbody className="divide-y divide-gray-700">
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white">{user.username}</div>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-300">{user.email}</div>
                     </td>

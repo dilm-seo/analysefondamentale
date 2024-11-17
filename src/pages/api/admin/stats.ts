@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const session = await getServerSession(req, res, authOptions);
 
-    if (!session?.user?.role === 'admin') {
+    if (!session?.user || session.user.role !== 'admin') {
       return res.status(403).json({ error: 'Accès non autorisé' });
     }
 
