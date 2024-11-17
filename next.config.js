@@ -8,8 +8,14 @@ const nextConfig = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
+        better-sqlite3: false
       };
     }
     return config;
   },
+  experimental: {
+    serverComponentsExternalPackages: ['better-sqlite3']
+  }
 }
+
+module.exports = nextConfig;

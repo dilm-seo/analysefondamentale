@@ -23,7 +23,8 @@
     "@tailwindcss/typography": "^0.5.10",
     "@heroicons/react": "^2.1.1",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^9.2.2"
+    "better-sqlite3": "^9.2.2",
+    "@vercel/postgres": "^0.5.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
