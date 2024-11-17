@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import db from '@/lib/db';
+import { db, prisma } from '@/lib/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -16,52 +16,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const userId = session.user.id;
 
       // Vérifier les limites d'analyse pour les utilisateurs gratuits
-      const userStmt = db.prepare('SELECT subscription FROM users WHERE id = ?');
-      const user = userStmt.get(userId);
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { subscription: true }
+      });
 
       if (user?.subscription === 'free') {
         const today = new Date().toISOString().split('T')[0];
-        const countStmt = db.prepare(`
+        const { rows: [{ count }] } = await db.query(`
           SELECT COUNT(*) as count 
           FROM analyses 
-          WHERE user_id = ? 
-          AND date(created_at) = ?
-        `);
-        const { count } = countStmt.get(userId, today);
+          WHERE user_id = $1 
+          AND DATE(created_at) = $2
+        `, [userId, today]);
 
-        if (count >= 5) {
+        if (parseInt(count) >= 5) {
           return res.status(403).json({ error: 'Limite quotidienne atteinte' });
         }
       }
 
-      const insertStmt = db.prepare(`
-        INSERT INTO analyses (id, user_id, content, model, cost, created_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `);
+      const analysis = await prisma.analysis.create({
+        data: {
+          content,
+          model,
+          cost,
+          userId
+        }
+      });
 
-      const analysisId = crypto.randomUUID();
-      insertStmt.run(
-        analysisId,
-        userId,
-        content,
-        model,
-        cost,
-        new Date().toISOString()
-      );
-
-      res.status(201).json({ id: analysisId });
+      res.status(201).json(analysis);
     } catch (error) {
       console.error('Erreur analyse:', error);
       res.status(500).json({ error: 'Erreur serveur' });
     }
   } else if (req.method === 'GET') {
     try {
-      const stmt = db.prepare(`
-        SELECT * FROM analyses 
-        WHERE user_id = ? 
-        ORDER BY created_at DESC
-      `);
-      const analyses = stmt.all(session.user.id);
+      const analyses = await prisma.analysis.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' }
+      });
 
       res.status(200).json(analyses);
     } catch (error) {

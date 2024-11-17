@@ -1,10 +1,16 @@
+import { PrismaClient } from '@prisma/client';
 import { sql } from '@vercel/postgres';
-import { drizzle } from 'drizzle-orm/vercel-postgres';
 
-// Initialize database connection
-export const db = drizzle(sql);
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-// Initialize database schema
+export const prisma = global.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
+
 export async function initializeDatabase() {
   try {
     await sql`
@@ -49,7 +55,6 @@ export async function initializeDatabase() {
       );
     `;
 
-    // Insert default feeds if none exist
     await sql`
       INSERT INTO feeds (id, name, url, enabled)
       VALUES 
@@ -67,3 +72,13 @@ export async function initializeDatabase() {
 
 // Initialize database on import
 initializeDatabase().catch(console.error);
+
+export const db = {
+  async query(query: string, params: any[] = []) {
+    return sql.query(query, params);
+  },
+  
+  async execute(query: string, params: any[] = []) {
+    return sql.query(query, params);
+  }
+};
