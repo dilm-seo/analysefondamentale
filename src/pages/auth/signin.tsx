@@ -5,26 +5,23 @@ import toast from 'react-hot-toast';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState('');
+  const { login, isLoading } = useAuthStore();
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       if (!email.includes('@')) {
         throw new Error('Email invalide');
       }
 
-      login(email);
+      await login(email, password);
       toast.success('Connexion réussie');
       router.push('/');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erreur de connexion');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -44,6 +41,19 @@ export default function SignIn() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Mot de passe
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               required
             />

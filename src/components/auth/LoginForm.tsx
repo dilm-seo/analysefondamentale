@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../../stores/authStore';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 
-const LoginForm: React.FC = () => {
+export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading } = useAuthStore();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
       await login(email, password);
       toast.success('Connexion réussie');
+      router.push('/');
     } catch (error) {
-      toast.error('Identifiants invalides');
+      toast.error(error instanceof Error ? error.message : 'Erreur de connexion');
     }
   };
 
@@ -61,18 +65,7 @@ const LoginForm: React.FC = () => {
             {isLoading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <a
-            href="#"
-            className="text-sm text-indigo-400 hover:text-indigo-300"
-          >
-            Mot de passe oublié ?
-          </a>
-        </div>
       </div>
     </div>
   );
-};
-
-export default LoginForm;
+}

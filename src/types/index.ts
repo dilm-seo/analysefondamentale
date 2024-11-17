@@ -4,20 +4,6 @@ export interface User {
   username: string;
   role: 'user' | 'admin';
   subscription?: 'free' | 'basic' | 'premium';
-  createdAt?: string;
-  lastLogin?: string;
-}
-
-export interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalAnalyses: number;
-  totalCosts: number;
-  subscriptionStats: {
-    free: number;
-    basic: number;
-    premium: number;
-  };
 }
 
 export interface FeedSource {
@@ -32,4 +18,13 @@ export interface NewsItem {
   description: string;
   pubDate: string;
   link: string;
+}
+
+export interface Settings {
+  theme: 'light' | 'dark';
+  language: 'fr' | 'en';
+  emailNotifications: boolean;
+  analysisFormat: 'html' | 'markdown' | 'text';
+  apiKey?: string;
+  systemPrompt?: string;
 }

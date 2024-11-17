@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { db } from '@/lib/db';
 import axios from 'axios';
+import { parseStringPromise } from 'xml2js';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -27,10 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         });
 
-        // Utiliser une approche compatible avec l'environnement serveur
-        const { parseStringPromise } = require('xml2js');
         const result = await parseStringPromise(response.data);
-        const items = result.rss.channel[0].item || [];
+        const items = result.rss?.channel?.[0]?.item || [];
 
         return items.map((item: any) => ({
           source: feed.name,
