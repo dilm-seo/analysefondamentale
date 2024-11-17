@@ -1,24 +1,33 @@
-import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 export const analysisService = {
-  getAnalyses() {
-    // Simplified version without database
-    return [];
-  },
+  async analyzeNews(news: any[], apiKey: string, model: string, systemPrompt: string) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: JSON.stringify(news) }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
 
-  saveAnalysis(content: string, model: string, cost: number) {
-    // Simplified version - just return the analysis object
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      content,
-      model,
-      cost,
-      createdAt: new Date().toISOString()
-    };
-  },
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'analyse');
+      }
 
-  checkAnalysisLimit() {
-    // Simplified version - always allow analysis
-    return true;
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Erreur lors de l\'analyse');
+    }
   }
 };

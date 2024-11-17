@@ -1,17 +1,38 @@
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { useNewsStore } from '@/stores/newsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { analysisService } from '@/services/analysisService';
 import toast from 'react-hot-toast';
 
 export default function Home() {
   const { news, fetchNews, isLoading } = useNewsStore();
-  const router = useRouter();
+  const { apiKey, model, systemPrompt } = useSettingsStore();
+  const [analysis, setAnalysis] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     fetchNews().catch(() => {
       toast.error('Erreur lors du chargement des actualités');
     });
   }, [fetchNews]);
+
+  const handleAnalyze = async () => {
+    if (!apiKey) {
+      toast.error('Veuillez configurer votre clé API dans les paramètres');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const result = await analysisService.analyzeNews(news, apiKey, model, systemPrompt);
+      setAnalysis(result);
+      toast.success('Analyse terminée');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'analyse');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -22,6 +43,29 @@ export default function Home() {
       </header>
 
       <main className="container mx-auto p-4">
+        <div className="mb-6 flex justify-between items-center">
+          <button
+            onClick={handleAnalyze}
+            disabled={isAnalyzing || news.length === 0}
+            className={`bg-indigo-600 text-white px-6 py-3 rounded-lg transition-colors ${
+              isAnalyzing || news.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-500'
+            }`}
+          >
+            {isAnalyzing ? 'Analyse en cours...' : 'Analyser les actualités'}
+          </button>
+        </div>
+
+        {analysis && (
+          <div className="bg-gray-800 rounded-lg p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-4">Analyse</h2>
+            <div className="prose prose-invert">
+              {analysis.split('\n').map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
