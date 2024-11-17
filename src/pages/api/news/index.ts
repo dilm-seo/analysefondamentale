@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import db from '@/lib/db';
+import { db } from '@/lib/db';
 import axios from 'axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,8 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      const stmt = db.prepare('SELECT * FROM feeds WHERE enabled = 1');
-      const feeds = stmt.all();
+      const { rows: feeds } = await db.query('SELECT * FROM feeds WHERE enabled = true');
 
       const newsPromises = feeds.map(async (feed) => {
         try {
