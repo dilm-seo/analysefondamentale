@@ -9,5 +9,13 @@
     "VERCEL_URL": "${VERCEL_URL}",
     "POSTGRES_URL": "${POSTGRES_URL}",
     "POSTGRES_URL_NON_POOLING": "${POSTGRES_URL_NON_POOLING}"
+  },
+  "build": {
+    "env": {
+      "NEXTAUTH_URL": "${VERCEL_URL}",
+      "VERCEL_URL": "${VERCEL_URL}",
+      "POSTGRES_URL": "${POSTGRES_URL}",
+      "POSTGRES_URL_NON_POOLING": "${POSTGRES_URL_NON_POOLING}"
+    }
   }
 }

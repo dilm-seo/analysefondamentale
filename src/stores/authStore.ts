@@ -1,14 +1,6 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface User {
-  id?: string;
-  email: string;
-  name: string;
-  role: 'user' | 'admin';
-  apiKey?: string;
-  systemPrompt?: string;
-}
+import { User } from '@/types';
 
 interface AuthState {
   user: User | null;
@@ -27,8 +19,9 @@ export const useAuthStore = create<AuthState>()(
       login: (email: string) => {
         set({
           user: {
+            id: Math.random().toString(36).substr(2, 9),
             email,
-            name: email.split('@')[0],
+            username: email.split('@')[0],
             role: email.includes('admin') ? 'admin' : 'user',
           },
           isAuthenticated: true,

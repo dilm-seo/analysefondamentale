@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
+  username: string;
   role: 'user' | 'admin';
   subscription?: 'free' | 'basic' | 'premium';
   createdAt?: string;
@@ -32,4 +32,4 @@ export interface NewsItem {
   description: string;
   pubDate: string;
   link: string;
-}</content>
+}

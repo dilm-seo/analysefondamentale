@@ -1,18 +1,18 @@
 import { sql } from '@vercel/postgres';
 
 export const db = {
-  async query(query: string, params: any[] = []) {
+  async query(text: string, params: any[] = []) {
     try {
-      return await sql.query(query, params);
+      return await sql.query(text, params);
     } catch (error) {
       console.error('Database query error:', error);
       throw error;
     }
   },
-  
-  async execute(query: string, params: any[] = []) {
+
+  async execute(text: string, params: any[] = []) {
     try {
-      return await sql.query(query, params);
+      return await sql.query(text, params);
     } catch (error) {
       console.error('Database execution error:', error);
       throw error;
