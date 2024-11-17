@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { db } from '@/lib/db';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -25,6 +24,10 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error'
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -40,10 +43,6 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     }
-  },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error'
   },
   session: {
     strategy: 'jwt',

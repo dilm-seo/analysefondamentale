@@ -1,39 +1,27 @@
-import { dbService } from './database';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { db } from '@/lib/db';
 
 export const authService = {
   async login(email: string, password: string) {
-    const user = await dbService.authenticateUser(email, password);
-    if (!user) throw new Error('Identifiants invalides');
+    // Simplified auth for demo
+    const user = {
+      id: Math.random().toString(36).substr(2, 9),
+      email,
+      username: email.split('@')[0],
+      role: email.includes('admin') ? 'admin' : 'user'
+    };
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    return { user, token };
+    return { user };
   },
 
-  async register(email: string, username: string, password: string) {
-    const user = await dbService.createUser(email, username, password);
-    
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+  async register(email: string, password: string) {
+    // Simplified registration for demo
+    const user = {
+      id: Math.random().toString(36).substr(2, 9),
+      email,
+      username: email.split('@')[0],
+      role: 'user'
+    };
 
-    return { user, token };
-  },
-
-  verifyToken(token: string) {
-    try {
-      return jwt.verify(token, JWT_SECRET);
-    } catch {
-      return null;
-    }
+    return { user };
   }
 };

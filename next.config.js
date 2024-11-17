@@ -4,6 +4,12 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['avatars.githubusercontent.com']
+  },
+  env: {
+    NEXTAUTH_URL: process.env.VERCEL_URL || 'http://localhost:3000',
+    POSTGRES_URL: process.env.POSTGRES_URL,
+    POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,
+    POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING
   }
 }
 
