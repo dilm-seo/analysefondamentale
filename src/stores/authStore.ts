@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
               email,
               username: email.split('@')[0],
               role: email.includes('admin') ? 'admin' : 'user',
+              subscription: 'free'
             },
             isAuthenticated: true,
             isLoading: false,
@@ -58,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
               email,
               username: email.split('@')[0],
               role: 'user',
+              subscription: 'free'
             },
             isAuthenticated: true,
             isLoading: false,
