@@ -9,7 +9,7 @@ export const analysisService = {
     return dbService.saveAnalysis(user.id, content, model, cost);
   },
 
-  async getUserAnalyses() {
+  async getAnalyses() {
     const user = useAuthStore.getState().user;
     if (!user) throw new Error('Non authentifié');
 
