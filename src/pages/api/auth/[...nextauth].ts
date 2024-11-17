@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { dbService } from '@/services/database';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,13 +15,19 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email requis');
         }
 
-        // Pour la démo, on accepte n'importe quel email
-        return {
-          id: Math.random().toString(36).substr(2, 9),
-          email: credentials.email,
-          name: credentials.email.split('@')[0],
-          role: credentials.email.includes('admin') ? 'admin' : 'user'
-        };
+        const user = await dbService.getUserByEmail(credentials.email);
+        
+        if (!user) {
+          // Pour la démo, créer un utilisateur s'il n'existe pas
+          const newUser = await dbService.createUser(
+            credentials.email,
+            credentials.email.split('@')[0]
+          );
+          return newUser;
+        }
+
+        await dbService.updateLastLogin(user.id);
+        return user;
       }
     })
   ],
