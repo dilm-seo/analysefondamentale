@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { User, SubscriptionTier } from '../types';
+import { User } from '../types';
 
 export const dbService = {
   async createUser(email: string, username: string): Promise<User> {
@@ -52,5 +52,46 @@ export const dbService = {
       AND DATE(created_at) = CURRENT_DATE
     `;
     return parseInt(result.rows[0].count);
+  },
+
+  // Admin functions
+  async getStats() {
+    const result = await sql`
+      WITH stats AS (
+        SELECT 
+          COUNT(DISTINCT u.id) as total_users,
+          COUNT(DISTINCT CASE WHEN u.last_login > NOW() - INTERVAL '7 days' THEN u.id END) as active_users,
+          COUNT(a.id) as total_analyses,
+          COALESCE(SUM(a.cost), 0) as total_costs,
+          COUNT(CASE WHEN u.subscription = 'free' THEN 1 END) as free_users,
+          COUNT(CASE WHEN u.subscription = 'basic' THEN 1 END) as basic_users,
+          COUNT(CASE WHEN u.subscription = 'premium' THEN 1 END) as premium_users
+        FROM users u
+        LEFT JOIN analyses a ON u.id = a.user_id
+      )
+      SELECT * FROM stats
+    `;
+    return result.rows[0];
+  },
+
+  async getAllUsers() {
+    const result = await sql`
+      SELECT id, email, username, role, subscription, created_at, last_login
+      FROM users
+      ORDER BY created_at DESC
+    `;
+    return result.rows;
+  },
+
+  async deleteUser(userId: string) {
+    await sql`
+      DELETE FROM analyses WHERE user_id = ${userId}
+    `;
+    await sql`
+      DELETE FROM settings WHERE user_id = ${userId}
+    `;
+    await sql`
+      DELETE FROM users WHERE id = ${userId}
+    `;
   }
 };

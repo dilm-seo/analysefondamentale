@@ -4,6 +4,8 @@ export interface User {
   username: string;
   role: 'user' | 'admin';
   subscription?: 'free' | 'basic' | 'premium';
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 export interface FeedSource {
@@ -27,4 +29,14 @@ export interface Settings {
   analysisFormat: 'html' | 'markdown' | 'text';
   apiKey?: string;
   systemPrompt?: string;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalAnalyses: number;
+  totalCosts: number;
+  freeUsers: number;
+  basicUsers: number;
+  premiumUsers: number;
 }

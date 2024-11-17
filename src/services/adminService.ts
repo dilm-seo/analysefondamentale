@@ -1,31 +1,31 @@
 import { dbService } from './database';
-import { useAuthStore } from '../stores/authStore';
+import { User } from '@/types';
 
 export const adminService = {
-  getStats() {
-    const user = useAuthStore.getState().user;
-    if (!user || user.role !== 'admin') {
-      throw new Error('Accès non autorisé');
+  async getStats() {
+    try {
+      return await dbService.getStats();
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      throw new Error('Failed to get stats');
     }
-
-    return dbService.getStats();
   },
 
-  getAllUsers() {
-    const user = useAuthStore.getState().user;
-    if (!user || user.role !== 'admin') {
-      throw new Error('Accès non autorisé');
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await dbService.getAllUsers();
+    } catch (error) {
+      console.error('Error getting users:', error);
+      throw new Error('Failed to get users');
     }
-
-    return dbService.getAllUsers();
   },
 
-  deleteUser(userId: string) {
-    const user = useAuthStore.getState().user;
-    if (!user || user.role !== 'admin') {
-      throw new Error('Accès non autorisé');
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      await dbService.deleteUser(userId);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw new Error('Failed to delete user');
     }
-
-    return dbService.deleteUser(userId);
   }
 };
