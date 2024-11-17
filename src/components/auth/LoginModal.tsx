@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../../stores/authStore';
+import { useState } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 
 interface LoginModalProps {
@@ -7,7 +7,7 @@ interface LoginModalProps {
   onClose: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,16 +18,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!email.includes('@')) {
+        throw new Error('Email invalide');
+      }
+
       if (isLogin) {
         await login(email, password);
         toast.success('Connexion réussie');
       } else {
-        await register(email, email.split('@')[0], password);
+        await register(email, password);
         toast.success('Inscription réussie');
       }
       onClose();
     } catch (error) {
-      toast.error(isLogin ? 'Identifiants invalides' : 'Erreur lors de l\'inscription');
+      toast.error(error instanceof Error ? error.message : 'Erreur d\'authentification');
     }
   };
 
@@ -95,6 +99,4 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
-
-export default LoginModal;
+}

@@ -8,6 +8,7 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateSettings: (settings: Partial<User>) => void;
 }
@@ -39,6 +40,31 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           set({ 
             error: error instanceof Error ? error.message : 'Erreur de connexion',
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+
+      register: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Simuler un délai d'inscription
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          set({
+            user: {
+              id: Math.random().toString(36).substr(2, 9),
+              email,
+              username: email.split('@')[0],
+              role: 'user',
+            },
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Erreur d\'inscription',
             isLoading: false 
           });
           throw error;
