@@ -1,5 +1,4 @@
 import { sql } from '@vercel/postgres';
-import { v4 as uuidv4 } from 'uuid';
 
 export const db = {
   async query(query: string, params: any[] = []) {
@@ -18,9 +17,5 @@ export const db = {
       console.error('Database execution error:', error);
       throw error;
     }
-  },
-
-  generateId() {
-    return uuidv4();
   }
 };
