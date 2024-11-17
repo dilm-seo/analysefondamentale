@@ -36,7 +36,9 @@ export interface AdminStats {
   activeUsers: number;
   totalAnalyses: number;
   totalCosts: number;
-  freeUsers: number;
-  basicUsers: number;
-  premiumUsers: number;
+  subscriptionStats: {
+    free: number;
+    basic: number;
+    premium: number;
+  };
 }

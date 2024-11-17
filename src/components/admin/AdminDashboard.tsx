@@ -29,53 +29,49 @@ const AdminDashboard: React.FC = () => {
           Tableau de bord administrateur
         </h1>
 
-        {/* Statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats && (
-            <>
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-300">Utilisateurs</h3>
-                <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
-                <p className="text-sm text-gray-400">Actifs: {stats.activeUsers}</p>
-              </div>
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-300">Utilisateurs</h3>
+              <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
+              <p className="text-sm text-gray-400">Actifs: {stats.activeUsers}</p>
+            </div>
 
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-300">Analyses</h3>
-                <p className="text-2xl font-bold text-white">{stats.totalAnalyses}</p>
-                <p className="text-sm text-gray-400">Coût total: ${stats.totalCosts}</p>
-              </div>
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-300">Analyses</h3>
+              <p className="text-2xl font-bold text-white">{stats.totalAnalyses}</p>
+              <p className="text-sm text-gray-400">Coût total: ${stats.totalCosts}</p>
+            </div>
 
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-300">Abonnements</h3>
-                <div className="space-y-2 mt-2">
-                  <p className="text-sm text-gray-400">
-                    Premium: {stats.subscriptionStats.premium}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Basic: {stats.subscriptionStats.basic}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Free: {stats.subscriptionStats.free}
-                  </p>
-                </div>
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-300">Abonnements</h3>
+              <div className="space-y-2 mt-2">
+                <p className="text-sm text-gray-400">
+                  Premium: {stats.subscriptionStats.premium}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Basic: {stats.subscriptionStats.basic}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Free: {stats.subscriptionStats.free}
+                </p>
               </div>
+            </div>
 
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-300">Actions</h3>
-                <div className="space-y-2 mt-4">
-                  <button
-                    onClick={() => useAdminStore.getState().exportData()}
-                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-500"
-                  >
-                    Exporter les données
-                  </button>
-                </div>
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-300">Actions</h3>
+              <div className="space-y-2 mt-4">
+                <button
+                  onClick={() => useAdminStore.getState().exportData()}
+                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-500"
+                >
+                  Exporter les données
+                </button>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
 
-        {/* Liste des utilisateurs */}
         <div className="bg-gray-800 rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-700">
             <h2 className="text-xl font-semibold text-white">

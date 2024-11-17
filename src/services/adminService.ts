@@ -10,9 +10,11 @@ export const adminService = {
         activeUsers: Number(stats.active_users),
         totalAnalyses: Number(stats.total_analyses),
         totalCosts: Number(stats.total_costs),
-        freeUsers: Number(stats.free_users),
-        basicUsers: Number(stats.basic_users),
-        premiumUsers: Number(stats.premium_users)
+        subscriptionStats: {
+          free: Number(stats.free_users),
+          basic: Number(stats.basic_users),
+          premium: Number(stats.premium_users)
+        }
       };
     } catch (error) {
       console.error('Error getting stats:', error);
