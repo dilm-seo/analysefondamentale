@@ -1,10 +1,19 @@
 import { dbService } from './database';
-import { User } from '@/types';
+import { User, AdminStats } from '@/types';
 
 export const adminService = {
-  async getStats() {
+  async getStats(): Promise<AdminStats> {
     try {
-      return await dbService.getStats();
+      const stats = await dbService.getStats();
+      return {
+        totalUsers: Number(stats.total_users),
+        activeUsers: Number(stats.active_users),
+        totalAnalyses: Number(stats.total_analyses),
+        totalCosts: Number(stats.total_costs),
+        freeUsers: Number(stats.free_users),
+        basicUsers: Number(stats.basic_users),
+        premiumUsers: Number(stats.premium_users)
+      };
     } catch (error) {
       console.error('Error getting stats:', error);
       throw new Error('Failed to get stats');
@@ -13,7 +22,16 @@ export const adminService = {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      return await dbService.getAllUsers();
+      const users = await dbService.getAllUsers();
+      return users.map(user => ({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role as 'user' | 'admin',
+        subscription: user.subscription as 'free' | 'basic' | 'premium',
+        createdAt: user.created_at?.toString(),
+        lastLogin: user.last_login?.toString()
+      }));
     } catch (error) {
       console.error('Error getting users:', error);
       throw new Error('Failed to get users');

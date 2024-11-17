@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { User } from '../types';
+import { User } from '@/types';
 
 export const dbService = {
   async createUser(email: string, username: string): Promise<User> {
@@ -8,14 +8,32 @@ export const dbService = {
       VALUES (${email}, ${username}, 'user')
       RETURNING *
     `;
-    return result.rows[0];
+    const user = result.rows[0];
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      subscription: user.subscription,
+      createdAt: user.created_at?.toString(),
+      lastLogin: user.last_login?.toString()
+    };
   },
 
   async getUserByEmail(email: string): Promise<User | null> {
     const result = await sql`
       SELECT * FROM users WHERE email = ${email}
     `;
-    return result.rows[0] || null;
+    const user = result.rows[0];
+    return user ? {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      subscription: user.subscription,
+      createdAt: user.created_at?.toString(),
+      lastLogin: user.last_login?.toString()
+    } : null;
   },
 
   async updateLastLogin(userId: string): Promise<void> {
@@ -54,7 +72,6 @@ export const dbService = {
     return parseInt(result.rows[0].count);
   },
 
-  // Admin functions
   async getStats() {
     const result = await sql`
       WITH stats AS (
