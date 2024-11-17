@@ -4,9 +4,6 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['avatars.githubusercontent.com']
-  },
-  experimental: {
-    serverComponentsExternalPackages: ['@vercel/postgres']
   }
 }
 
